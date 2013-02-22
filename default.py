@@ -1,4 +1,4 @@
-#UGHH - by r0tt 2012. V0.0.4
+#UGHH - by r0tt 2012. V0.0.5
 
 import urllib,urllib2,re,string,xbmcaddon,xbmcplugin,xbmcgui,socket,sys,os
 
@@ -61,61 +61,15 @@ def INDEX(url):
                 pageurl=url + str(page1).strip("['']")
                 addDir("Go To Page " + str(page1) + ' of ' + str(page2).strip("['']"), pageurl, 1, "")
         title=re.compile('\"><div class=\'resultsTBContainer\' style=\'background-image\: url\(\/video\/images\/snapshots\/(.+?_.+?).jpg').findall(link)
-        video1=re.compile('<tr align=\'center\' class=\'b\'><td align=\'left\'><table width=\'100%\' border=\'0\'><tr><td align=\'center\' class=\'w3\'><a href=\'(.+?)\'').findall(link)
-        #video1 = str(video1).replace("&amp;","&")
-        video=['http://www.undergroundhiphop.com'+li for li in video1]
+        video1=re.compile('\"><div class=\'resultsTBContainer\' style=\'background-image\: url\(\/video\/images\/snapshots\/(.+?).jpg').findall(link)
+        video=['http://downloads.ughh.com/media/video_files/mp4/'+li+'.mp4' for li in video1]
         thumb=re.compile('image\: url\((/video/images/snapshots/.+?.jpg)\)\;').findall(link)
         thumb=['http://www.undergroundhiphop.com'+li for li in thumb]
         match=zip(title, video, thumb)
         for name,url,thumb in match:
                 name = name.replace("_"," - ")
                 name = re.sub(r"(?<=\w)([A-Z])", r" \1", name)
-                addDir(name,url,2,thumb)
-        xbmcplugin.endOfDirectory(pluginhandle)
-
-def VIDEOLINKS(url,name):
-        req = urllib2.Request(url)
-        req.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:18.0) Gecko/18.0 Firefox/18.0')
-        response = urllib2.urlopen(req)
-        link=response.read()
-        response.close()
-        match=re.compile('flashvars=\"videoPath=(http://www.undergroundhiphop.com/video/view.asp\?ID=.+?)&').findall(link)
-        match1 = str(match)
-        match1 = match1.strip("'[]'")
-        track = str(name) + '.mp4'
-        for url in match:
-                action = ''
-                dialog = xbmcgui.Dialog()
-                action = dialog.yesno("Download or Play", "", "                                              Choose", "", "Play", "Download")
-                if ( action == 1 ):
-                    DownloaderClass(str(match1),track)
-                    dialog.ok("Download Completed", "", "                   File has been downloaded to home folder")
-                else:
-                    addLink(name,url,'')
-        xbmcplugin.endOfDirectory(pluginhandle)
-
-def DL(match1,track):
-    DownloaderClass(str(match1),track)
-    xbmcplugin.endOfDirectory(pluginhandle)
-
-def DownloaderClass(url,dest):
-    dialog = xbmcgui.DialogProgress()
-    dialog.create("UGHH Video DL","Downloading File",url)
-    urllib.urlretrieve(url,dest,lambda nb, bs, fs, url=url: _pbhook(nb,bs,fs,url,dialog))
-
-def _pbhook(numblocks, blocksize, filesize, url=None,dialog=None):
-    try:
-        percent = min((numblocks*blocksize*100)/filesize, 100)
-        print percent
-        dialog.update(percent)
-    except:
-        percent = 100
-        dialog.update(percent)
-    if dialog.iscanceled(): 
-        print "DOWNLOAD CANCELLED"
-        dialog.close()
-    if percent == 100:
-        dialog.close()
+                addLink(name,url,thumb)
         xbmcplugin.endOfDirectory(pluginhandle)
 
 def Search():
