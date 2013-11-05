@@ -1,4 +1,5 @@
-#UGHH - by r0tt 2012. V0.0.5
+# -*- coding: utf-8 -*-
+#UGHH - by r0tt 2012. V0.0.6
 
 import urllib,urllib2,re,string,xbmcaddon,xbmcplugin,xbmcgui,socket,sys,os
 
@@ -19,58 +20,73 @@ except:
 cache = StorageServer.StorageServer("ArtworkDownloader",24)
 addon = xbmcaddon.Addon('plugin.video.ughh')
 scriptpath = addon.getAddonInfo('path')
-base='http://www.undergroundhiphop.com/video/index.asp?'
+base='http://www.ughh.com/video/index.asp?'
 q = scriptpath+'/icon.png'
+ua='Mozilla/5.0 (X11; Linux x86_64; rv:17.0) Gecko/17.0 Firefox/17.0'
 
 def CATEGORIES():                               
-        addDir('New Videos',base + 'Category=MusicVideo&Sort=Newest&InHD=All&Null=2&Page=',1,q)
-        addDir('New Top Rated',base + 'Category=MusicVideo&Sort=TopRated&InHD=All&Null=1&Page=',1,q)
-        addDir('Old School',base + 'Category=MusicVideo_OS&Sort=Newest&InHD=All&Null=1&Page=',1,q)
-        addDir('Old Top Rated',base + 'Category=MusicVideo_OS&Sort=TopRated&InHD=All&Null=1&Page=',1,q)
-        addDir('Search','&keywords=',1,q)
-        addDir('#',base + 'Category=All&Sort=Newest&InHD=All&Null=2&PageLetter=%23',1,q)
-        url = base + 'Category=All&Sort=Newest&InHD=All&Null=2&PageLetter='
-        p = '&Page='
-        array = string.uppercase[:26]
-        for char in array:
-            addDir(char,url + str(char) + p,1,q)
-        xbmcplugin.endOfDirectory(pluginhandle)
-        
+		addDir('New Videos',base + 'Category=MusicVideo&Sort=Newest&InHD=All&Null=2&Page=',1,q)
+		addDir('New Top Rated',base + 'Category=MusicVideo&Sort=TopRated&InHD=All&Null=1&Page=',1,q)
+		addDir('Old School',base + 'Category=MusicVideo_OS&Sort=Newest&InHD=All&Null=1&Page=',1,q)
+		addDir('Old Top Rated',base + 'Category=MusicVideo_OS&Sort=TopRated&InHD=All&Null=1&Page=',1,q)
+		addDir('Search','&keywords=',1,q)
+		addDir('#',base + 'Category=All&Sort=Newest&InHD=All&Null=2&PageLetter=%23',1,q)
+		url = base + 'Category=All&Sort=Newest&InHD=All&Null=2&PageLetter='
+		p = '&Page='
+		array = string.uppercase[:26]
+		for char in array:
+			addDir(char,url + str(char) + p,1,q)
+		xbmcplugin.endOfDirectory(pluginhandle)
+
 def INDEX(url):
-        if url == '&keywords=':
-            search = Search()
-            url=base + 'searchby=All&searchTarget=video&x=20&y=16' + url + search    
-        req=urllib2.Request(url)
-        req.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:17.0) Gecko/17.0 Firefox/17.0')
-        response = urllib2.urlopen(req)
-        link=response.read()
-        response.close()
-        page12=re.compile('valign=\"bottom\" class=\"s\"><nobr>Page <b>(.+?)<\/b> of <b>(.+?)<\/b> \(<b>').findall(link)
-        page12=str(page12).strip('[(\')]')
-        page1=re.compile("(\d{1,2})', '").findall(str(page12))
-        page2=re.compile("', '(\d{1,2})").findall(str(page12))
-        if not page1==page2:
-            page1=int(str(page1).strip("['']"))+1
-            url=re.sub("&Page=([0-9]*)", "&Page=", url)
-            pageurl=url + str(page1).strip("['']")
-            addDir("Go To Page " + str(page1) + ' of ' + str(page2).strip("['']"), pageurl, 1, "")
-        else:
-            page1=int(str(page1).strip("['']"))-1
-            if not page1==0:
-                url=re.sub("&Page=([0-9]*)", "&Page=", url)            
-                pageurl=url + str(page1).strip("['']")
-                addDir("Go To Page " + str(page1) + ' of ' + str(page2).strip("['']"), pageurl, 1, "")
-        title=re.compile('\"><div class=\'resultsTBContainer\' style=\'background-image\: url\(\/video\/images\/snapshots\/(.+?_.+?).jpg').findall(link)
-        video1=re.compile('\"><div class=\'resultsTBContainer\' style=\'background-image\: url\(\/video\/images\/snapshots\/(.+?).jpg').findall(link)
-        video=['http://downloads.ughh.com/media/video_files/mp4/'+li+'.mp4' for li in video1]
-        thumb=re.compile('image\: url\((/video/images/snapshots/.+?.jpg)\)\;').findall(link)
-        thumb=['http://www.undergroundhiphop.com'+li for li in thumb]
-        match=zip(title, video, thumb)
-        for name,url,thumb in match:
-                name = name.replace("_"," - ")
-                name = re.sub(r"(?<=\w)([A-Z])", r" \1", name)
-                addLink(name,url,thumb)
-        xbmcplugin.endOfDirectory(pluginhandle)
+		if url == '&keywords=':
+			search = Search()
+			url=base + 'searchby=All&searchTarget=video&x=20&y=16' + url + search    
+		req=urllib2.Request(url)
+		req.add_header('User-Agent', ua)
+		response = urllib2.urlopen(req)
+		link=response.read()
+		response.close()
+		page12=re.compile('valign=\"bottom\" class=\"s\"><nobr>Page <b>(.+?)<\/b> of <b>(.+?)<\/b> \(<b>').findall(link)
+		page12=str(page12).strip('[(\')]')
+		page1=re.compile("(\d{1,2})', '").findall(str(page12))
+		page2=re.compile("', '(\d{1,2})").findall(str(page12))
+		if not page1==page2:
+			page1=int(str(page1).strip("['']"))+1
+			url=re.sub("&Page=([0-9]*)", "&Page=", url)
+			pageurl=url + str(page1).strip("['']")
+			addDir("Go To Page " + str(page1) + ' of ' + str(page2).strip("['']"), pageurl, 1, "")
+		else:
+			page1=int(str(page1).strip("['']"))-1
+			if not page1==0:
+				url=re.sub("&Page=([0-9]*)", "&Page=", url)            
+				pageurl=url + str(page1).strip("['']")
+				addDir("Go To Page " + str(page1) + ' of ' + str(page2).strip("['']"), pageurl, 1, "")
+		title=re.compile('background-image: url\(/video/images/snapshots_480_width/(.+?).jpg').findall(link)
+		video=re.compile('<td align=\'center\' class=\'w3\'><a href=\'(/video/detail.asp\?t\=.+?)\' class=\"HoverLink\">').findall(link)
+		video=['http://ughh.com'+li for li in video]
+		thumb=re.compile('background-image: url\((/video/images/snapshots_480_width/.+?)\?').findall(link)
+		thumb=['http://www.undergroundhiphop.com'+li for li in thumb]
+		match=zip(title, video, thumb)
+		for name,url,thumb in match:
+			name = name.replace("_"," - ")
+			name = re.sub(r"(?<=\w)([A-Z])", r" \1", name)
+			addDir(name,url,2,thumb)
+		xbmcplugin.endOfDirectory(pluginhandle)
+
+def VIDEOLINKS(url,name):
+		req = urllib2.Request(url)
+		req.add_header('User-Agent', ua)
+		response = urllib2.urlopen(req)
+		link=response.read()
+		response.close()
+		match1=str(re.compile('src=&quot;//(.+?)/embed/').findall(link)).strip("['']")
+		if match1 == 'www.youtube.com':
+			match=str(re.compile('src=&quot;//www.youtube.com/embed/(.+?)&quot;').findall(link)).strip("['']")
+			url='plugin://plugin.video.youtube/?path=/root/video&action=play_video&videoid=%s' % match
+			addLink(name,url,'')
+			xbmc.executebuiltin("xbmc.PlayMedia("+url+")")
+		xbmcplugin.endOfDirectory(pluginhandle)
 
 def Search():
 	search = ''
